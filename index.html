@@ -242,28 +242,21 @@ function loadCounts(){
 
 function getTherapist(spec){
   var list=SPECIALISTS[spec].therapists;
-  var rows=lastRows[spec]; // {t1: {benefited}, t2: {benefited}}
-  if(!rows) return list[0];
+  var rows=lastRows[spec];
+  if(!rows || !rows["_last"]) return list[0];
 
-  // Find each therapist's last benefited status
-  // If therapist's last = "لا" → they should get next case
-  // If therapist's last = "نعم" or never seen → normal turn
-  
-  // Logic: find who has "لا" as their last status → give them priority
-  for(var i=0;i<list.length;i++){
-    var t=list[i].trim();
-    if(rows[t] && rows[t].trim()==="لا") return t;
+  var lastT = rows["_last"].trim();
+  var lastStatus = (rows[lastT] || "").trim();
+  var lastIdx = list.indexOf(lastT);
+  if(lastIdx < 0) return list[0];
+
+  // If last therapist benefited (نعم) → move to next
+  if(lastStatus === "نعم"){
+    return list[(lastIdx + 1) % list.length];
   }
   
-  // Nobody has "لا" → give to whoever hasn't been seen or has "نعم"
-  // Find last therapist in this spec and move to next
-  var lastT=rows["_last"]||"";
-  if(!lastT) return list[0];
-  var idx=list.indexOf(lastT.trim());
-  if(idx<0) return list[0];
-  // If last therapist's status is "نعم" → move to next
-  if(rows[lastT.trim()]==="نعم") return list[(idx+1)%list.length];
-  return list[idx];
+  // If last therapist did NOT benefit (لا or empty) → keep same
+  return lastT;
 }
 
 function computeRecs(){
