@@ -232,30 +232,30 @@ function goNext(){
 var lastRows = {};
 
 function loadCounts(){
-  return fetch(SCRIPT_URL+"?action=read")
+  return fetch(SCRIPT_URL+"?action=read&cb="+Date.now())
     .then(function(r){return r.json();})
     .then(function(d){
-      if(d&&d.lastRows) lastRows=d.lastRows;
+      if(d && d.lastRows) lastRows = d.lastRows;
     })
-    .catch(function(){});
+    .catch(function(){ lastRows = {}; });
 }
 
 function getTherapist(spec){
-  var list=SPECIALISTS[spec].therapists;
-  var rows=lastRows[spec];
-  if(!rows || !rows["_last"]) return list[0];
+  var list = SPECIALISTS[spec].therapists;
+  var last = lastRows[spec];
 
-  var lastT = rows["_last"].trim();
-  var lastStatus = (rows[lastT] || "").trim();
+  // No previous data → start with first therapist
+  if(!last || !last.therapist) return list[0];
+
+  var lastT = last.therapist.trim();
+  var lastB = (last.benefited || "").trim();
   var lastIdx = list.indexOf(lastT);
   if(lastIdx < 0) return list[0];
 
-  // If last therapist benefited (نعم) → move to next
-  if(lastStatus === "نعم"){
-    return list[(lastIdx + 1) % list.length];
-  }
-  
-  // If last therapist did NOT benefit (لا or empty) → keep same
+  // نعم = benefited → move to NEXT therapist
+  if(lastB === "نعم") return list[(lastIdx + 1) % list.length];
+
+  // لا or empty = not benefited → keep SAME therapist
   return lastT;
 }
 
