@@ -228,27 +228,31 @@ function goNext(){
   }
 }
 
+// lastRow[spec] = {therapist, benefited}
+var lastRows = {};
+
 function loadCounts(){
   return fetch(SCRIPT_URL+"?action=read")
     .then(function(r){return r.json();})
-    .then(function(d){if(d&&d.counts)therapistCounts=d.counts;})
+    .then(function(d){
+      if(d&&d.lastRows) lastRows=d.lastRows;
+    })
     .catch(function(){});
 }
 
 function getTherapist(spec){
   var list=SPECIALISTS[spec].therapists;
-  var chosen=list[0];
-  var minCount=Infinity;
-  for(var i=0;i<list.length;i++){
-    var cnt=therapistCounts[list[i]]||0;
-    if(cnt<minCount){minCount=cnt;chosen=list[i];}
+  var last=lastRows[spec];
+  if(!last || !last.therapist) return list[0];
+  var lastTherapist=last.therapist.trim();
+  var benefited=last.benefited.trim();
+  // If last was "نعم" → move to next therapist
+  if(benefited==="نعم"){
+    var idx=list.indexOf(lastTherapist);
+    return list[(idx+1)%list.length];
   }
-  // If tied, use round-robin
-  if(list[0]&&list[1]&&(therapistCounts[list[0]]||0)===(therapistCounts[list[1]]||0)){
-    chosen=list[tIdx[spec]%list.length];
-    tIdx[spec]++;
-  }
-  return chosen;
+  // If last was "لا" or empty → keep same therapist
+  return lastTherapist||list[0];
 }
 
 function computeRecs(){
