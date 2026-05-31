@@ -255,15 +255,22 @@ function computeRecs(){
   var c=Array.isArray(answers.concerns)?answers.concerns:(answers.concerns?[answers.concerns]:[]);
   var d=answers.diagnosis;
   var recs=[];
-  var needSpeech=c.indexOf("تأخر الكلام أو النطق")>=0||c.indexOf("صعوبة الأكل أو البلع")>=0||c.indexOf("التأتأة أو التلعثم")>=0||c.indexOf("ضعف اللغة والفهم")>=0||d==="توحد"||d==="اضطراب اللغة"||d==="متلازمة داون";
-  var needOT=c.indexOf("ضعف المهارات الدقيقة")>=0||c.indexOf("حساسية حسية مفرطة")>=0||c.indexOf("صعوبة التخطيط الحركي")>=0||c.indexOf("صعوبة الاعتناء بالنفس")>=0||d==="توحد"||d==="اضطراب المعالجة الحسية"||d==="شلل دماغي (نقص أكسجين)"||d==="متلازمة داون";
-  var needPT=c.indexOf("صعوبة المشي أو التوازن")>=0||c.indexOf("ضعف قوة العضلات")>=0||c.indexOf("شد وتيبس عضلي")>=0||c.indexOf("تأخر في الحركة الكبيرة")>=0||d==="شلل دماغي (نقص أكسجين)"||d==="متلازمة داون";
-  var needPsych=c.indexOf("مشاكل سلوكية أو عدوانية")>=0||c.indexOf("ضعف التركيز والانتباه")>=0||c.indexOf("ضعف التفاعل الاجتماعي")>=0||c.indexOf("القلق والخوف المفرط")>=0||d==="فرط حركة ADHD"||d==="توحد"||d==="صعوبات التعلم";
-  if(needSpeech)recs.push("speech");
-  if(needOT)recs.push("ot");
-  if(needPT)recs.push("pt");
-  if(needPsych)recs.push("psych");
-  if(recs.length===0)recs.push("speech");
+  var speechItems=["تأخر الكلام أو النطق","صعوبة الأكل أو البلع","التأتأة أو التلعثم","ضعف اللغة والفهم"];
+  var otItems=["ضعف المهارات الدقيقة","حساسية حسية مفرطة","صعوبة التخطيط الحركي","صعوبة الاعتناء بالنفس"];
+  var ptItems=["صعوبة المشي أو التوازن","ضعف قوة العضلات","شد وتيبس عضلي","تأخر في الحركة الكبيرة"];
+  var psychItems=["مشاكل سلوكية أو عدوانية","ضعف التركيز والانتباه","ضعف التفاعل الاجتماعي","القلق والخوف المفرط"];
+
+  var scores={
+    speech: c.filter(function(x){return speechItems.indexOf(x)>=0;}).length,
+    ot:     c.filter(function(x){return otItems.indexOf(x)>=0;}).length,
+    pt:     c.filter(function(x){return ptItems.indexOf(x)>=0;}).length,
+    psych:  c.filter(function(x){return psychItems.indexOf(x)>=0;}).length
+  };
+
+  // Only include specs with at least 1 matching concern, sorted by score descending
+  var specOrder=["speech","ot","pt","psych"];
+  specOrder.sort(function(a,b){return scores[b]-scores[a];});
+  specOrder.forEach(function(sp){if(scores[sp]>0)recs.push(sp);});
   return recs;
 }
 
@@ -329,14 +336,25 @@ function saveToSheet(recs,therapists){
     payment:answers.payment||"",
     reports:answers.reports||"",
     specialists:recs.map(function(r){return SPECIALISTS[r].name;}).join(", "),
-    therapists:therapists.join(", ")
+    speech_therapist: recs.indexOf("speech")>=0 ? therapists[recs.indexOf("speech")] : "",
+    ot_therapist:     recs.indexOf("ot")>=0     ? therapists[recs.indexOf("ot")]     : "",
+    pt_therapist:     recs.indexOf("pt")>=0     ? therapists[recs.indexOf("pt")]     : "",
+    psych_therapist:  recs.indexOf("psych")>=0  ? therapists[recs.indexOf("psych")]  : ""
   };
   var url=SCRIPT_URL+"?data="+encodeURIComponent(JSON.stringify(payload));
-  var img=new Image();img.src=url;
-  setTimeout(function(){
-    var el=document.getElementById("saveStatus");
-    if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
-  },2000);
+  fetch(url)
+    .then(function(){
+      var el=document.getElementById("saveStatus");
+      if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
+    })
+    .catch(function(){
+      // fallback to image trick
+      var img=new Image();img.src=url;
+      setTimeout(function(){
+        var el=document.getElementById("saveStatus");
+        if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
+      },2000);
+    });
 }
 
 function resetAll(){
