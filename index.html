@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>استقبال حالات — إرادة للتأهيل الطبي</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+:root { --brand: #1a3a5c; --brand-light: #e8f0f8; --accent: #2e7d32; --accent-light: #e8f5e9; --gold: #c8a84b; }
+body { font-family: "Segoe UI", Tahoma, Arial, sans-serif; background: #f0f4f8; color: #1a1a2e; min-height: 100vh; padding: 20px 16px; }
+.wrapper { max-width: 640px; margin: 0 auto; }
+.header { background: var(--brand); border-radius: 14px; padding: 18px 24px; margin-bottom: 20px; }
+.header h1 { font-size: 18px; font-weight: 700; color: white; margin-bottom: 4px; }
+.header p { font-size: 12px; color: rgba(255,255,255,0.65); }
+.progress-wrap { margin-bottom: 18px; }
+.progress-meta { display: flex; justify-content: space-between; font-size: 12px; color: #6b7280; margin-bottom: 6px; }
+.progress-track { height: 5px; background: #dde3ea; border-radius: 3px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--brand), var(--gold)); border-radius: 3px; transition: width 0.4s ease; }
+.card { background: white; border-radius: 14px; border: 1px solid #e2e8f0; padding: 22px; margin-bottom: 14px; box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+.q-num { font-size: 11px; color: var(--gold); margin-bottom: 5px; font-weight: 700; }
+.q-title { font-size: 16px; font-weight: 700; color: var(--brand); margin-bottom: 4px; }
+.q-hint { font-size: 12px; color: #9ca3af; margin-bottom: 4px; }
+.options { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; margin-top: 14px; }
+.cat-header { grid-column: 1/-1; background: var(--brand); color: var(--gold); text-align: center; padding: 6px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; margin-top: 6px; letter-spacing: 0.05em; }
+.opt { border: 1.5px solid #e2e8f0; border-radius: 10px; padding: 10px 8px; cursor: pointer; transition: all 0.15s; background: #fafbfc; text-align: center; user-select: none; }
+.opt:hover { border-color: var(--brand); background: var(--brand-light); }
+.opt.selected { border-color: var(--brand); background: var(--brand-light); }
+.opt.selected .opt-label { color: var(--brand); font-weight: 700; }
+.opt-icon { font-size: 20px; margin-bottom: 4px; }
+.opt-label { font-size: 12px; color: #374151; line-height: 1.4; }
+.nav { display: flex; gap: 10px; margin-top: 6px; }
+.btn-next { flex: 1; padding: 13px; background: var(--brand); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer; }
+.btn-next:hover { background: #142d4a; }
+.btn-next:disabled { background: #cbd5e1; cursor: not-allowed; }
+.btn-back { padding: 13px 18px; background: white; color: #6b7280; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 15px; cursor: pointer; }
+.result-top { text-align: center; padding: 16px 0 18px; border-bottom: 1px solid #f1f5f9; margin-bottom: 16px; }
+.result-icon { font-size: 42px; margin-bottom: 8px; }
+.result-title { font-size: 19px; font-weight: 700; color: var(--brand); margin-bottom: 4px; }
+.result-sub { font-size: 13px; color: #6b7280; }
+.section-label { font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.06em; margin: 14px 0 8px; }
+.spec-row { display: flex; align-items: center; justify-content: space-between; padding: 13px 15px; border-radius: 10px; margin-bottom: 7px; border: 1px solid transparent; }
+.spec-row.p1 { background: var(--accent-light); border-color: #a5d6a7; }
+.spec-row.p2 { background: var(--brand-light); border-color: #90caf9; }
+.spec-row.p3 { background: #f8fafc; border-color: #e2e8f0; }
+.spec-row.p4 { background: #fffbeb; border-color: #fcd34d; }
+.spec-name { font-size: 14px; font-weight: 700; }
+.spec-row.p1 .spec-name { color: #1b5e20; }
+.spec-row.p2 .spec-name { color: var(--brand); }
+.spec-row.p3 .spec-name { color: #374151; }
+.spec-row.p4 .spec-name { color: #92400e; }
+.spec-therapist { font-size: 12px; color: #6b7280; margin-top: 2px; }
+.spec-badge { font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; white-space: nowrap; }
+.spec-row.p1 .spec-badge { background: var(--accent); color: white; }
+.spec-row.p2 .spec-badge { background: var(--brand); color: white; }
+.spec-row.p3 .spec-badge { background: #94a3b8; color: white; }
+.spec-row.p4 .spec-badge { background: #d97706; color: white; }
+.tags-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 4px; }
+.tag { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 500; padding: 5px 12px; border-radius: 20px; }
+.tag-blue { background: #dbeafe; color: #1e40af; }
+.tag-amber { background: #fef3c7; color: #92400e; }
+.tag-green { background: #dcfce7; color: #166534; }
+.tag-red { background: #fee2e2; color: #991b1b; }
+.btn-print { width: 100%; padding: 12px; background: var(--accent-light); color: var(--accent); border: 1.5px solid #a5d6a7; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; margin-top: 10px; }
+.btn-new { width: 100%; padding: 12px; background: white; color: #374151; border: 1.5px solid #e2e8f0; border-radius: 10px; font-size: 14px; cursor: pointer; margin-top: 8px; }
+.saving { text-align: center; font-size: 12px; color: #9ca3af; margin-top: 10px; }
+.saving.ok { color: var(--accent); font-weight: 600; }
+.summary-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 14px; margin-bottom: 8px; }
+.summary-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 10px; text-align: center; }
+.summary-label { font-size: 10px; color: #9ca3af; margin-bottom: 2px; }
+.summary-val { font-size: 13px; font-weight: 700; color: var(--brand); }
+.concern-cat { font-size: 11px; font-weight: 700; margin-bottom: 4px; margin-top: 8px; }
+.concern-tag { display: inline-block; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 20px; padding: 3px 10px; margin: 2px; font-size: 12px; color: #374151; }
+@media print { .btn-new, .btn-print, .nav, .saving { display: none; } body { background: white; padding: 0; } .card { box-shadow: none; } }
+</style>
+</head>
+<body>
+<div class="wrapper">
+  <div class="header">
+    <h1>إرادة للتأهيل الطبي</h1>
+    <p>نظام استقبال وتوجيه حالات قسم تأهيل الأطفال</p>
+  </div>
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-meta">
+      <span id="progressText">السؤال 1 من 5</span>
+      <span id="progressPct">17%</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progressFill" style="width:17%"></div>
+    </div>
+  </div>
+  <div id="questionArea"></div>
+  <div id="resultArea" style="display:none"></div>
+</div>
+<script>
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbw7Z6tXfLZTR3dwtztMeeMEDPCPkVBYJjvGv5Mh7kdBHuCEJGIkVuo1LIjuEDkIRPjZ/exec";
+
+const SPECIALISTS = {
+  speech: { name: "علاج النطق والتواصل", therapists: ["أ. تنسيم بني يوسف", "أ. لين أبو دية"] },
+  ot:     { name: "العلاج الوظيفي",       therapists: ["أ. صهيب العمايرة", "أ. عبد الله العبيد"] },
+  pt:     { name: "العلاج الطبيعي",       therapists: ["أ. عمر صلاح", "أ. وليد محمد"] },
+  psych:  { name: "العلاج النفسي",        therapists: ["أ. سعدية صالح", "أ. رفيدة مهدي"] }
+};
+const tIdx = { pt:0, ot:0, psych:0, speech:0 };
+let therapistCounts = {};
+
+const QUESTIONS = [
+  {
+    id:"age", label:"السؤال 1 من 5", title:"ما عمر الطفل؟", multi:false,
+    options:[
+      {v:"أقل من سنة", icon:"👶", label:"أقل من سنة"},
+      {v:"1 - 2 سنة", icon:"👶", label:"1 – 2 سنة"},
+      {v:"3 - 4 سنوات", icon:"🧒", label:"3 – 4 سنوات"},
+      {v:"5 - 6 سنوات", icon:"🧒", label:"5 – 6 سنوات"},
+      {v:"7 - 9 سنوات", icon:"🧑", label:"7 – 9 سنوات"},
+      {v:"10 - 14 سنة", icon:"🧑", label:"10 – 14 سنة"}
+    ]
+  },
+  {
+    id:"diagnosis", label:"السؤال 2 من 5", title:"هل عنده تشخيص طبي سابق؟", multi:false,
+    options:[
+      {v:"توحد", icon:"🧩", label:"توحد"},
+      {v:"فرط حركة ADHD", icon:"⚡", label:"فرط حركة / ADHD"},
+      {v:"شلل دماغي (نقص أكسجين)", icon:"♿", label:"شلل دماغي (نقص أكسجين)"},
+      {v:"تأخر نمائي عام", icon:"📋", label:"تأخر نمائي عام"},
+      {v:"صعوبات التعلم", icon:"📚", label:"صعوبات التعلم"},
+      {v:"متلازمة داون", icon:"🌟", label:"متلازمة داون"},
+      {v:"اضطراب المعالجة الحسية", icon:"🌀", label:"اضطراب المعالجة الحسية"},
+      {v:"اضطراب اللغة", icon:"🗣️", label:"اضطراب اللغة"},
+      {v:"لا يوجد تشخيص", icon:"❓", label:"لا يوجد تشخيص"}
+    ]
+  },
+  {
+    id:"concerns", label:"السؤال 3 من 5", title:"ما المشكلة الرئيسية؟", hint:"يمكن اختيار أكثر من واحدة", multi:true,
+    options:[
+      {v:"_cat_speech", cat:true, label:"━━ علاج النطق ━━"},
+      {v:"تأخر الكلام أو النطق", icon:"🗣️", label:"تأخر الكلام أو النطق"},
+      {v:"صعوبة الأكل أو البلع", icon:"🍽️", label:"صعوبة الأكل أو البلع"},
+      {v:"التأتأة أو التلعثم", icon:"💬", label:"التأتأة أو التلعثم"},
+      {v:"ضعف اللغة والفهم", icon:"📖", label:"ضعف اللغة والفهم"},
+      {v:"_cat_ot", cat:true, label:"━━ العلاج الوظيفي ━━"},
+      {v:"ضعف المهارات الدقيقة", icon:"✏️", label:"ضعف المهارات الدقيقة"},
+      {v:"حساسية حسية مفرطة", icon:"🌀", label:"حساسية حسية مفرطة"},
+      {v:"صعوبة التخطيط الحركي", icon:"🖐️", label:"صعوبة التخطيط الحركي"},
+      {v:"صعوبة الاعتناء بالنفس", icon:"🧴", label:"صعوبة الاعتناء بالنفس"},
+      {v:"_cat_pt", cat:true, label:"━━ العلاج الطبيعي ━━"},
+      {v:"صعوبة المشي أو التوازن", icon:"🏃", label:"صعوبة المشي أو التوازن"},
+      {v:"ضعف قوة العضلات", icon:"💪", label:"ضعف قوة العضلات"},
+      {v:"شد وتيبس عضلي", icon:"⚡", label:"شد وتيبس عضلي"},
+      {v:"تأخر في الحركة الكبيرة", icon:"🦵", label:"تأخر في الحركة الكبيرة"},
+      {v:"_cat_psych", cat:true, label:"━━ العلاج النفسي ━━"},
+      {v:"مشاكل سلوكية أو عدوانية", icon:"😤", label:"مشاكل سلوكية أو عدوانية"},
+      {v:"ضعف التركيز والانتباه", icon:"🎯", label:"ضعف التركيز والانتباه"},
+      {v:"ضعف التفاعل الاجتماعي", icon:"👥", label:"ضعف التفاعل الاجتماعي"},
+      {v:"القلق والخوف المفرط", icon:"😰", label:"القلق والخوف المفرط"}
+    ]
+  },
+  {
+    id:"payment", label:"السؤال 4 من 5", title:"طريقة الدفع؟", multi:false,
+    options:[
+      {v:"تأمين طبي", icon:"🏥", label:"تأمين طبي"},
+      {v:"كاش", icon:"💵", label:"كاش / دفع ذاتي"}
+    ]
+  },
+  {
+    id:"reports", label:"السؤال 5 من 5", title:"هل معه تقارير طبية أو تشخيصية؟", multi:false,
+    options:[
+      {v:"يوجد تقارير", icon:"📁", label:"يوجد تقارير"},
+      {v:"لا يوجد", icon:"📭", label:"لا يوجد تقارير"}
+    ]
+  }
+];
+
+let answers={}, current=0, selected=[];
+function pct(q){return Math.round(((q+1)/QUESTIONS.length)*100);}
+
+function renderQ(){
+  var q=QUESTIONS[current];
+  selected=answers[q.id]?(Array.isArray(answers[q.id])?answers[q.id].slice():[answers[q.id]]):[];
+  document.getElementById("progressText").textContent=q.label;
+  document.getElementById("progressPct").textContent=pct(current)+"%";
+  document.getElementById("progressFill").style.width=pct(current)+"%";
+
+  var optsHtml="";
+  for(var i=0;i<q.options.length;i++){
+    var o=q.options[i];
+    if(o.cat){
+      optsHtml+='<div class="cat-header">'+o.label+'</div>';
+    } else {
+      var sel=selected.indexOf(o.v)>=0?"selected":"";
+      var safeV=o.v.replace(/\\/g,"\\\\").replace(/"/g,"&quot;");
+      optsHtml+='<div class="opt '+sel+'" onclick="pick(\''+safeV.replace(/'/g,"\\'")+'\',' +q.multi+')"><div class="opt-icon">'+o.icon+'</div><div class="opt-label">'+o.label+'</div></div>';
+    }
+  }
+
+  var backBtn=current>0?'<button class="btn-back" onclick="goBack()">← رجوع</button>':"";
+  var nextLabel=current<QUESTIONS.length-1?"التالي ←":"✅ عرض التوصية";
+  var dis=selected.length===0?"disabled":"";
+  document.getElementById("questionArea").innerHTML=
+    '<div class="card"><div class="q-num">'+q.label+'</div><div class="q-title">'+q.title+'</div>'+
+    (q.hint?'<div class="q-hint">'+q.hint+'</div>':'')+
+    '<div class="options">'+optsHtml+'</div></div>'+
+    '<div class="nav">'+backBtn+'<button class="btn-next" id="btnNext" onclick="goNext()" '+dis+'>'+nextLabel+'</button></div>';
+}
+
+function pick(val,multi){
+  var i=selected.indexOf(val);
+  if(multi){if(i>=0)selected.splice(i,1);else selected.push(val);}
+  else{selected=[val];}
+  answers[QUESTIONS[current].id]=multi?selected.slice():selected[0];
+  var opts=document.querySelectorAll(".opt");
+  var qi=0;
+  for(var j=0;j<QUESTIONS[current].options.length;j++){
+    if(QUESTIONS[current].options[j].cat) continue;
+    if(opts[qi]) opts[qi].className="opt"+(selected.indexOf(QUESTIONS[current].options[j].v)>=0?" selected":"");
+    qi++;
+  }
+  document.getElementById("btnNext").disabled=selected.length===0;
+}
+
+function goBack(){if(current>0){current--;renderQ();}}
+
+function goNext(){
+  if(current<QUESTIONS.length-1){current++;renderQ();}
+  else{
+    document.getElementById("progressWrap").style.display="none";
+    document.getElementById("questionArea").innerHTML='<div style="text-align:center;padding:40px;color:#1a3a5c;font-size:16px;">⏳ جاري تحضير التوصية...</div>';
+    loadCounts().then(function(){showResult();});
+  }
+}
+
+function loadCounts(){
+  return fetch(SCRIPT_URL+"?action=read")
+    .then(function(r){return r.json();})
+    .then(function(d){if(d&&d.counts)therapistCounts=d.counts;})
+    .catch(function(){});
+}
+
+function getTherapist(spec){
+  var list=SPECIALISTS[spec].therapists;
+  var chosen=list[0];
+  var minCount=Infinity;
+  for(var i=0;i<list.length;i++){
+    var cnt=therapistCounts[list[i]]||0;
+    if(cnt<minCount){minCount=cnt;chosen=list[i];}
+  }
+  // If tied, use round-robin
+  if(list[0]&&list[1]&&(therapistCounts[list[0]]||0)===(therapistCounts[list[1]]||0)){
+    chosen=list[tIdx[spec]%list.length];
+    tIdx[spec]++;
+  }
+  return chosen;
+}
+
+function computeRecs(){
+  var c=Array.isArray(answers.concerns)?answers.concerns:(answers.concerns?[answers.concerns]:[]);
+  var d=answers.diagnosis;
+  var recs=[];
+  var needSpeech=c.indexOf("تأخر الكلام أو النطق")>=0||c.indexOf("صعوبة الأكل أو البلع")>=0||c.indexOf("التأتأة أو التلعثم")>=0||c.indexOf("ضعف اللغة والفهم")>=0||d==="توحد"||d==="اضطراب اللغة"||d==="متلازمة داون";
+  var needOT=c.indexOf("ضعف المهارات الدقيقة")>=0||c.indexOf("حساسية حسية مفرطة")>=0||c.indexOf("صعوبة التخطيط الحركي")>=0||c.indexOf("صعوبة الاعتناء بالنفس")>=0||d==="توحد"||d==="اضطراب المعالجة الحسية"||d==="شلل دماغي (نقص أكسجين)"||d==="متلازمة داون";
+  var needPT=c.indexOf("صعوبة المشي أو التوازن")>=0||c.indexOf("ضعف قوة العضلات")>=0||c.indexOf("شد وتيبس عضلي")>=0||c.indexOf("تأخر في الحركة الكبيرة")>=0||d==="شلل دماغي (نقص أكسجين)"||d==="متلازمة داون";
+  var needPsych=c.indexOf("مشاكل سلوكية أو عدوانية")>=0||c.indexOf("ضعف التركيز والانتباه")>=0||c.indexOf("ضعف التفاعل الاجتماعي")>=0||c.indexOf("القلق والخوف المفرط")>=0||d==="فرط حركة ADHD"||d==="توحد"||d==="صعوبات التعلم";
+  if(needSpeech)recs.push("speech");
+  if(needOT)recs.push("ot");
+  if(needPT)recs.push("pt");
+  if(needPsych)recs.push("psych");
+  if(recs.length===0)recs.push("speech");
+  return recs;
+}
+
+function showResult(){
+  document.getElementById("questionArea").style.display="none";
+  document.getElementById("resultArea").style.display="block";
+
+  var recs=computeRecs();
+  var pLabels=["أولوية أولى","أولوية ثانية","أولوية ثالثة","أولوية رابعة"];
+  var pClass=["p1","p2","p3","p4"];
+  var assignedTherapists=recs.map(function(r){return getTherapist(r);});
+
+  var specsHtml="";
+  for(var i=0;i<recs.length;i++){
+    var sp=SPECIALISTS[recs[i]];
+    var th=assignedTherapists[i];
+    specsHtml+='<div class="spec-row '+pClass[i]+'"><div><div class="spec-name">'+sp.name+'</div><div class="spec-therapist">يُحجز عند: '+th+'</div></div><span class="spec-badge">'+pLabels[i]+'</span></div>';
+  }
+
+  var payTag=answers.payment==="تأمين طبي"?'<span class="tag tag-blue">🏥 تأمين — تأكد من الموافقة المسبقة</span>':'<span class="tag tag-amber">💵 كاش — أبلغ الأهل بالتكلفة</span>';
+  var repTag=answers.reports==="لا يوجد"?'<span class="tag tag-red">⚠️ لا توجد تقارير — اطلب من الأهل</span>':'<span class="tag tag-green">✅ التقارير موجودة — أرفقها بالملف</span>';
+
+  // Concerns grouped
+  var c=Array.isArray(answers.concerns)?answers.concerns:(answers.concerns?[answers.concerns]:[]);
+  var speechC=["تأخر الكلام أو النطق","صعوبة الأكل أو البلع","التأتأة أو التلعثم","ضعف اللغة والفهم"];
+  var otC=["ضعف المهارات الدقيقة","حساسية حسية مفرطة","صعوبة التخطيط الحركي","صعوبة الاعتناء بالنفس"];
+  var ptC=["صعوبة المشي أو التوازن","ضعف قوة العضلات","شد وتيبس عضلي","تأخر في الحركة الكبيرة"];
+  var psychC=["مشاكل سلوكية أو عدوانية","ضعف التركيز والانتباه","ضعف التفاعل الاجتماعي","القلق والخوف المفرط"];
+
+  function buildCat(label,color,cats){
+    var m=c.filter(function(x){return cats.indexOf(x)>=0;});
+    if(!m.length)return "";
+    return '<div class="concern-cat" style="color:'+color+'">'+label+'</div>'+m.map(function(x){return '<span class="concern-tag">● '+x+'</span>';}).join('');
+  }
+
+  var concernsHtml=buildCat("🗣️ علاج النطق","#1a3a5c",speechC)+buildCat("🖐️ العلاج الوظيفي","#2e7d32",otC)+buildCat("🏃 العلاج الطبيعي","#c17f24",ptC)+buildCat("😤 العلاج النفسي","#6a1b9a",psychC);
+
+  var summaryHtml=concernsHtml?
+    '<div class="section-label">المشاكل المُبلَّغ عنها</div><div class="summary-box">'+
+    '<div class="summary-grid" style="grid-template-columns:1fr 1fr;">'+
+    '<div><div class="summary-label">العمر</div><div class="summary-val">'+(answers.age||"—")+'</div></div>'+
+    '<div><div class="summary-label">التشخيص</div><div class="summary-val">'+(answers.diagnosis||"—")+'</div></div>'+
+    '</div>'+concernsHtml+'</div>':'';
+
+  document.getElementById("resultArea").innerHTML=
+    '<div class="card"><div class="result-top"><div class="result-icon">✅</div><div class="result-title">التوصية جاهزة</div><div class="result-sub">بناءً على المعلومات المدخلة</div></div>'+
+    summaryHtml+
+    '<div class="section-label">التخصصات الموصى بها</div>'+specsHtml+
+    '<div class="section-label">ملاحظات إضافية</div><div class="tags-row">'+payTag+repTag+'</div></div>'+
+    '<button class="btn-print" onclick="window.print()">🖨️ طباعة التوصية</button>'+
+    '<button class="btn-new" onclick="resetAll()">➕ حالة جديدة</button>'+
+    '<div class="saving" id="saveStatus">جاري حفظ البيانات...</div>';
+
+  saveToSheet(recs,assignedTherapists);
+}
+
+function saveToSheet(recs,therapists){
+  var c=Array.isArray(answers.concerns)?answers.concerns:(answers.concerns?[answers.concerns]:[]);
+  var payload={
+    age:answers.age||"",
+    diagnosis:answers.diagnosis||"",
+    concerns:c.join(", "),
+    payment:answers.payment||"",
+    reports:answers.reports||"",
+    specialists:recs.map(function(r){return SPECIALISTS[r].name;}).join(", "),
+    therapists:therapists.join(", ")
+  };
+  var url=SCRIPT_URL+"?data="+encodeURIComponent(JSON.stringify(payload));
+  var img=new Image();img.src=url;
+  setTimeout(function(){
+    var el=document.getElementById("saveStatus");
+    if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
+  },2000);
+}
+
+function resetAll(){
+  answers={};current=0;selected=[];
+  therapistCounts={};
+  document.getElementById("progressWrap").style.display="block";
+  document.getElementById("questionArea").style.display="block";
+  document.getElementById("resultArea").style.display="none";
+  renderQ();
+}
+
+renderQ();
+</script>
+</body>
+</html>
