@@ -171,7 +171,6 @@ var QUESTIONS = [
 ];
 
 var answers = {}, current = 0, selected = [];
-var therapistCounts = {};
 
 function pct(q) { return Math.round(((q+1)/QUESTIONS.length)*100); }
 
@@ -228,28 +227,7 @@ function goBack() { if (current > 0) { current--; renderQ(); } }
 
 function goNext() {
   if (current < QUESTIONS.length - 1) { current++; renderQ(); }
-  else {
-    document.getElementById("progressWrap").style.display = "none";
-    document.getElementById("questionArea").innerHTML = '<div class="loading">⏳ جاري تحضير التوصية...</div>';
-    loadCounts().then(function() { showResult(); });
-  }
-}
-
-function loadCounts() {
-  return fetch(SCRIPT_URL + "?action=read&cb=" + Date.now())
-    .then(function(r) { return r.json(); })
-    .then(function(d) { if (d && d.counts) therapistCounts = d.counts; })
-    .catch(function() { therapistCounts = {}; });
-}
-
-function getTherapist(spec) {
-  var list = SPECIALISTS[spec].therapists;
-  var minCount = Infinity, chosen = list[0];
-  for (var i = 0; i < list.length; i++) {
-    var cnt = therapistCounts[list[i]] || 0;
-    if (cnt < minCount) { minCount = cnt; chosen = list[i]; }
-  }
-  return chosen;
+  else { showResult(); }
 }
 
 function computeRecs() {
@@ -280,15 +258,11 @@ function showResult() {
   var recs = computeRecs();
   var pLabels = ["أولوية أولى","أولوية ثانية","أولوية ثالثة","أولوية رابعة"];
   var pClass  = ["p1","p2","p3","p4"];
-  var assignedTherapists = recs.map(function(r){ return getTherapist(r); });
-
   var specsHtml = "";
   for (var i = 0; i < recs.length; i++) {
     var sp = SPECIALISTS[recs[i]];
-    var th = assignedTherapists[i];
     specsHtml += '<div class="spec-row ' + pClass[i] + '">' +
-      '<div><div class="spec-name">' + sp.name + '</div>' +
-      '<div class="spec-therapist">يُحجز عند: ' + th + '</div></div>' +
+      '<div><div class="spec-name">' + sp.name + '</div></div>' +
       '<span class="spec-badge">' + pLabels[i] + '</span></div>';
   }
 
@@ -338,19 +312,16 @@ function showResult() {
     '<button class="btn-new" onclick="resetAll()">➕ حالة جديدة</button>' +
     '<div class="saving" id="saveStatus">جاري حفظ البيانات...</div>';
 
-  saveToSheet(recs, assignedTherapists);
+  saveToSheet(recs);
 }
 
-function saveToSheet(recs, therapists) {
+function saveToSheet(recs) {
   var c = Array.isArray(answers.concerns) ? answers.concerns : (answers.concerns ? [answers.concerns] : []);
-  var specMap = {speech:"", ot:"", pt:"", psych:""};
-  for (var i = 0; i < recs.length; i++) { specMap[recs[i]] = therapists[i] || ""; }
   var payload = {
     age: answers.age||"", diagnosis: answers.diagnosis||"",
     concerns: c.join(", "), payment: answers.payment||"",
     reports: answers.reports||"",
-    specialists: recs.map(function(r){ return SPECIALISTS[r].name; }).join(", "),
-    speech: specMap.speech, ot: specMap.ot, pt: specMap.pt, psych: specMap.psych
+    specialists: recs.map(function(r){ return SPECIALISTS[r].name; }).join(", ")
   };
   var url = SCRIPT_URL + "?data=" + encodeURIComponent(JSON.stringify(payload));
   var img = new Image(); img.src = url;
