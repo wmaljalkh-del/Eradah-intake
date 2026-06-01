@@ -221,15 +221,31 @@ function goBack(){if(current>0){current--;renderQ();}}
 
 function goNext(){
   if(current<QUESTIONS.length-1){current++;renderQ();}
-  else{showResult();}
+  else{
+    document.getElementById("progressWrap").style.display="none";
+    document.getElementById("questionArea").innerHTML='<div style="text-align:center;padding:40px;color:#1a3a5c;font-size:16px;">⏳ جاري تحضير التوصية...</div>';
+    loadCounts().then(function(){ showResult(); });
+  }
 }
 
-function loadCounts(){ return Promise.resolve(); }
+var therapistCounts = {};
+
+function loadCounts(){
+  return fetch(SCRIPT_URL+"?action=read&cb="+Date.now())
+    .then(function(r){ return r.json(); })
+    .then(function(d){ if(d && d.counts) therapistCounts = d.counts; })
+    .catch(function(){ therapistCounts = {}; });
+}
 
 function getTherapist(spec){
   var list = SPECIALISTS[spec].therapists;
-  var chosen = list[tIdx[spec] % list.length];
-  tIdx[spec]++;
+  // Pick therapist with fewest total cases
+  var minCount = Infinity;
+  var chosen = list[0];
+  for(var i=0; i<list.length; i++){
+    var cnt = therapistCounts[list[i]] || 0;
+    if(cnt < minCount){ minCount = cnt; chosen = list[i]; }
+  }
   return chosen;
 }
 
