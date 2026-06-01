@@ -221,42 +221,16 @@ function goBack(){if(current>0){current--;renderQ();}}
 
 function goNext(){
   if(current<QUESTIONS.length-1){current++;renderQ();}
-  else{
-    document.getElementById("progressWrap").style.display="none";
-    document.getElementById("questionArea").innerHTML='<div style="text-align:center;padding:40px;color:#1a3a5c;font-size:16px;">⏳ جاري تحضير التوصية...</div>';
-    loadCounts().then(function(){showResult();});
-  }
+  else{showResult();}
 }
 
-// lastRow[spec] = {therapist, benefited}
-var lastRows = {};
-
-function loadCounts(){
-  return fetch(SCRIPT_URL+"?action=read&cb="+Date.now())
-    .then(function(r){return r.json();})
-    .then(function(d){
-      if(d && d.lastRows) lastRows = d.lastRows;
-    })
-    .catch(function(){ lastRows = {}; });
-}
+function loadCounts(){ return Promise.resolve(); }
 
 function getTherapist(spec){
   var list = SPECIALISTS[spec].therapists;
-  var last = lastRows[spec];
-
-  // No previous data → start with first therapist
-  if(!last || !last.therapist) return list[0];
-
-  var lastT = last.therapist.trim();
-  var lastB = (last.benefited || "").trim();
-  var lastIdx = list.indexOf(lastT);
-  if(lastIdx < 0) return list[0];
-
-  // نعم = benefited → move to NEXT therapist
-  if(lastB === "نعم") return list[(lastIdx + 1) % list.length];
-
-  // لا or empty = not benefited → keep SAME therapist
-  return lastT;
+  var chosen = list[tIdx[spec] % list.length];
+  tIdx[spec]++;
+  return chosen;
 }
 
 function computeRecs(){
