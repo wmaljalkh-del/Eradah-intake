@@ -318,25 +318,17 @@ function saveToSheet(recs,therapists){
     payment:answers.payment||"",
     reports:answers.reports||"",
     specialists:recs.map(function(r){return SPECIALISTS[r].name;}).join(", "),
-    speech_therapist: recs.indexOf("speech")>=0 ? therapists[recs.indexOf("speech")] : "",
-    ot_therapist:     recs.indexOf("ot")>=0     ? therapists[recs.indexOf("ot")]     : "",
-    pt_therapist:     recs.indexOf("pt")>=0     ? therapists[recs.indexOf("pt")]     : "",
-    psych_therapist:  recs.indexOf("psych")>=0  ? therapists[recs.indexOf("psych")]  : ""
+    speech: recs.indexOf("speech")>=0 ? therapists[recs.indexOf("speech")] : "",
+    ot:     recs.indexOf("ot")>=0     ? therapists[recs.indexOf("ot")]     : "",
+    pt:     recs.indexOf("pt")>=0     ? therapists[recs.indexOf("pt")]     : "",
+    psych:  recs.indexOf("psych")>=0  ? therapists[recs.indexOf("psych")]  : ""
   };
   var url=SCRIPT_URL+"?data="+encodeURIComponent(JSON.stringify(payload));
-  fetch(url)
-    .then(function(){
-      var el=document.getElementById("saveStatus");
-      if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
-    })
-    .catch(function(){
-      // fallback to image trick
-      var img=new Image();img.src=url;
-      setTimeout(function(){
-        var el=document.getElementById("saveStatus");
-        if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
-      },2000);
-    });
+  var img=new Image();img.src=url;
+  setTimeout(function(){
+    var el=document.getElementById("saveStatus");
+    if(el){el.textContent="تم حفظ البيانات في الشيت ✅";el.className="saving ok";}
+  },2000);
 }
 
 function resetAll(){
