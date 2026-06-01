@@ -311,6 +311,11 @@ function showResult(){
 
 function saveToSheet(recs,therapists){
   var c=Array.isArray(answers.concerns)?answers.concerns:(answers.concerns?[answers.concerns]:[]);
+  // Build per-specialty therapist map
+  var specMap={speech:"",ot:"",pt:"",psych:""};
+  for(var i=0;i<recs.length;i++){
+    specMap[recs[i]]=therapists[i]||"";
+  }
   var payload={
     age:answers.age||"",
     diagnosis:answers.diagnosis||"",
@@ -318,10 +323,10 @@ function saveToSheet(recs,therapists){
     payment:answers.payment||"",
     reports:answers.reports||"",
     specialists:recs.map(function(r){return SPECIALISTS[r].name;}).join(", "),
-    speech: recs.indexOf("speech")>=0 ? therapists[recs.indexOf("speech")] : "",
-    ot:     recs.indexOf("ot")>=0     ? therapists[recs.indexOf("ot")]     : "",
-    pt:     recs.indexOf("pt")>=0     ? therapists[recs.indexOf("pt")]     : "",
-    psych:  recs.indexOf("psych")>=0  ? therapists[recs.indexOf("psych")]  : ""
+    speech:specMap.speech,
+    ot:specMap.ot,
+    pt:specMap.pt,
+    psych:specMap.psych
   };
   var url=SCRIPT_URL+"?data="+encodeURIComponent(JSON.stringify(payload));
   var img=new Image();img.src=url;
